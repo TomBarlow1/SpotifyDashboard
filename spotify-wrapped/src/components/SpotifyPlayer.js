@@ -7,6 +7,7 @@ const SpotifyPlayer = ({ token, trackUri }) => {
   const [isPlaying, setIsPlaying] = useState(false); // Track whether song is playing
   const [seek, setSeek] = useState(0); // Store user-selected position on the progress bar
   const [currentTrack, setCurrentTrack] = useState(null); // Store current track details
+  const progressInterval = useRef(null); // Store interval ID
 
   // Initialize the Spotify Web Playback SDK when token is available
   useEffect(() => {
@@ -106,6 +107,7 @@ const SpotifyPlayer = ({ token, trackUri }) => {
       playerRef.current.resume(); // Resume the track if it's currently paused
     }
   };
+  
 
   // Handle the progress bar change
   const handleProgressBarChange = (event) => {
@@ -136,6 +138,25 @@ const SpotifyPlayer = ({ token, trackUri }) => {
     const seconds = Math.floor((milliseconds % 60000) / 1000); // Calculate seconds
     return `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`; // Return formatted time
   };
+
+  // Update progress every 100ms when the song is playing
+  useEffect(() => {
+    if (isPlaying && playerRef.current) {
+      progressInterval.current = setInterval(() => {
+        setProgress((prevProgress) => {
+          // Avoid progress exceeding the track duration
+          if (playerState && prevProgress < playerState.duration) {
+            return prevProgress + 100; // Increment progress by 100ms
+          }
+          return prevProgress;
+        });
+      }, 100); // Update progress every 100ms
+    } else {
+      clearInterval(progressInterval.current); // Clear the interval if not playing
+    }
+
+    return () => clearInterval(progressInterval.current); // Clean up interval on unmount
+  }, [isPlaying, playerState]);
 
   return (
     <div className="spotify-player-ui">
