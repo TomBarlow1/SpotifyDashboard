@@ -101,10 +101,8 @@ const SpotifyPlayer = ({ token, trackUri }) => {
 
   // Handle play/pause toggle
   const handlePlayPause = () => {
-    if (isPlaying) {
-      playerRef.current.pause(); // Pause the track if it's currently playing
-    } else {
-      playerRef.current.resume(); // Resume the track if it's currently paused
+    if (playerRef.current) {
+      playerRef.current.togglePlay(); // toggles play/pause
     }
   };
   

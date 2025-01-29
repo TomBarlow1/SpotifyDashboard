@@ -25,13 +25,13 @@ const Dashboard = () => {
         setLoading(true);
 
         const tracksResponse = await axios.get(
-          `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}`,
+          `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=48`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setTopTracks(tracksResponse.data.items);
 
         const artistsResponse = await axios.get(
-          `https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}`,
+          `https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}&limit=48`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setTopArtists(artistsResponse.data.items);
