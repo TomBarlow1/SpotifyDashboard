@@ -4,38 +4,42 @@ import { useNavigate } from "react-router-dom";
 import SpotifyPlayer from "../components/SpotifyPlayer";
 
 const Dashboard = () => {
+  // State variables to store top tracks, top artists, genres, loading state, time range, and selected track URI
   const [topTracks, setTopTracks] = useState([]);
   const [topArtists, setTopArtists] = useState([]);
   const [genres, setGenres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("short_term");
   const [trackUri, setTrackUri] = useState(null);
-  const [activeTab, setActiveTab] = useState("tracks"); // Active tab state
+  const [activeTab, setActiveTab] = useState("tracks"); // State to manage active tab selection
   const navigate = useNavigate();
-  const token = localStorage.getItem("spotify_token");
+  const token = localStorage.getItem("spotify_token"); // Retrieve Spotify token from local storage
 
   useEffect(() => {
     const fetchData = async () => {
       if (!token) {
-        navigate("/");
+        navigate("/"); // Redirect to home if token is not available
         return;
       }
 
       try {
         setLoading(true);
 
+        // Fetch top tracks from Spotify API
         const tracksResponse = await axios.get(
           `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=48`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setTopTracks(tracksResponse.data.items);
 
+        // Fetch top artists from Spotify API
         const artistsResponse = await axios.get(
           `https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}&limit=48`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setTopArtists(artistsResponse.data.items);
 
+        // Process genres from top artists and count occurrences
         const genreCounts = {};
         artistsResponse.data.items.forEach((artist) => {
           artist.genres.forEach((genre) => {
@@ -43,6 +47,7 @@ const Dashboard = () => {
           });
         });
 
+        // Sort genres by frequency and update state
         const sortedGenres = Object.entries(genreCounts)
           .sort((a, b) => b[1] - a[1])
           .map(([genre]) => genre);
@@ -50,6 +55,7 @@ const Dashboard = () => {
         setGenres(sortedGenres);
         setLoading(false);
       } catch (error) {
+        // Handle authentication error and redirect to login
         if (error.response?.status === 401) {
           localStorage.removeItem("spotify_token");
           navigate("/");
@@ -58,8 +64,9 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, [token, timeRange, navigate]);
+  }, [token, timeRange, navigate]); // Re-fetch data when token or time range changes
 
+  // Display loading screen while fetching data
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-900 text-white">
@@ -72,6 +79,7 @@ const Dashboard = () => {
     <div className="bg-gray-900 text-white min-h-screen p-6">
       <h1 className="text-4xl font-bold mb-8">Welcome to Your Spotify Dashboard</h1>
 
+      {/* Time range selection buttons */}
       <div className="mb-8 flex justify-center space-x-4">
         {["short_term", "medium_term", "long_term"].map((range) => (
           <button
@@ -86,6 +94,7 @@ const Dashboard = () => {
         ))}
       </div>
 
+      {/* Tab selection buttons */}
       <div className="mb-8 flex justify-center space-x-4">
         <button
           onClick={() => setActiveTab("tracks")}
@@ -113,8 +122,10 @@ const Dashboard = () => {
         </button>
       </div>
 
+      {/* Spotify Player component */}
       <SpotifyPlayer token={token} trackUri={trackUri} />
 
+      {/* Display top tracks */}
       {activeTab === "tracks" && (
         <div className="mb-12">
           <h2 className="text-2xl font-semibold mb-4">Your Top Tracks</h2>
@@ -140,6 +151,7 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Display top genres */}
       {activeTab === "genres" && (
         <div className="mb-12">
           <h2 className="text-2xl font-semibold mb-4">Your Top Genres</h2>
@@ -156,6 +168,7 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Display top artists */}
       {activeTab === "artists" && (
         <div>
           <h2 className="text-2xl font-semibold mb-4">Your Top Artists</h2>
