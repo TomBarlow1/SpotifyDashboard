@@ -1,45 +1,44 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import SpotifyPlayer from "../components/SpotifyPlayer";
 
+
+
 const Dashboard = () => {
-  // State variables to store top tracks, top artists, genres, loading state, time range, and selected track URI
   const [topTracks, setTopTracks] = useState([]);
   const [topArtists, setTopArtists] = useState([]);
   const [genres, setGenres] = useState([]);
+  const [recentlyPlayed, setRecentlyPlayed] = useState([]); // State for recently played tracks
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("short_term");
   const [trackUri, setTrackUri] = useState(null);
-  const [activeTab, setActiveTab] = useState("tracks"); // State to manage active tab selection
+  const [activeTab, setActiveTab] = useState("tracks");
   const navigate = useNavigate();
-  const token = localStorage.getItem("spotify_token"); // Retrieve Spotify token from local storage
+  const token = localStorage.getItem("spotify_token");
 
   useEffect(() => {
     const fetchData = async () => {
       if (!token) {
-        navigate("/"); // Redirect to home if token is not available
+        navigate("/");
         return;
       }
 
       try {
         setLoading(true);
 
-        // Fetch top tracks from Spotify API
         const tracksResponse = await axios.get(
           `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=48`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setTopTracks(tracksResponse.data.items);
 
-        // Fetch top artists from Spotify API
         const artistsResponse = await axios.get(
           `https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}&limit=48`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setTopArtists(artistsResponse.data.items);
 
-        // Process genres from top artists and count occurrences
         const genreCounts = {};
         artistsResponse.data.items.forEach((artist) => {
           artist.genres.forEach((genre) => {
@@ -47,15 +46,20 @@ const Dashboard = () => {
           });
         });
 
-        // Sort genres by frequency and update state
         const sortedGenres = Object.entries(genreCounts)
           .sort((a, b) => b[1] - a[1])
           .map(([genre]) => genre);
 
         setGenres(sortedGenres);
+
+        const recentlyPlayedResponse = await axios.get(
+          "https://api.spotify.com/v1/me/player/recently-played?limit=48",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setRecentlyPlayed(recentlyPlayedResponse.data.items);
+
         setLoading(false);
       } catch (error) {
-        // Handle authentication error and redirect to login
         if (error.response?.status === 401) {
           localStorage.removeItem("spotify_token");
           navigate("/");
@@ -64,9 +68,8 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, [token, timeRange, navigate]); // Re-fetch data when token or time range changes
+  }, [token, timeRange, navigate]);
 
-  // Display loading screen while fetching data
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-900 text-white">
@@ -79,7 +82,6 @@ const Dashboard = () => {
     <div className="bg-gray-900 text-white min-h-screen p-6">
       <h1 className="text-4xl font-bold mb-8">Welcome to Your Spotify Dashboard</h1>
 
-      {/* Time range selection buttons */}
       <div className="mb-8 flex justify-center space-x-4">
         {["short_term", "medium_term", "long_term"].map((range) => (
           <button
@@ -94,7 +96,8 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Tab selection buttons */}
+      
+
       <div className="mb-8 flex justify-center space-x-4">
         <button
           onClick={() => setActiveTab("tracks")}
@@ -120,12 +123,26 @@ const Dashboard = () => {
         >
           Top Artists
         </button>
+        <button
+          onClick={() => setActiveTab("recentlyPlayed")}
+          className={`px-4 py-2 rounded ${
+            activeTab === "recentlyPlayed" ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
+          }`}
+        >
+          Recently Played
+        </button>
       </div>
 
-      {/* Spotify Player component */}
+      <div className="mb-8 flex justify-center space-x-4">
+        <Link to="/shareable-cards">
+          <button className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-400">
+            Shareable Cards
+          </button>
+        </Link>
+      </div>
+
       <SpotifyPlayer token={token} trackUri={trackUri} />
 
-      {/* Display top tracks */}
       {activeTab === "tracks" && (
         <div className="mb-12">
           <h2 className="text-2xl font-semibold mb-4">Your Top Tracks</h2>
@@ -151,7 +168,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Display top genres */}
       {activeTab === "genres" && (
         <div className="mb-12">
           <h2 className="text-2xl font-semibold mb-4">Your Top Genres</h2>
@@ -168,7 +184,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Display top artists */}
       {activeTab === "artists" && (
         <div>
           <h2 className="text-2xl font-semibold mb-4">Your Top Artists</h2>
@@ -182,6 +197,31 @@ const Dashboard = () => {
                 />
                 <h3 className="text-lg font-bold">{artist.name}</h3>
                 <p className="text-sm text-gray-400">{artist.genres.slice(0, 2).join(", ")}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeTab === "recentlyPlayed" && (
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Recently Played Tracks</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {recentlyPlayed.map((item, index) => (
+              <div
+                key={index}
+                className="bg-gray-800 p-4 rounded cursor-pointer hover:bg-gray-700 transition duration-300"
+                onClick={() => setTrackUri(item.track.uri)}
+              >
+                <img
+                  src={item.track.album.images[0]?.url}
+                  alt={item.track.name}
+                  className="w-full h-40 object-cover rounded mb-2"
+                />
+                <h3 className="text-lg font-bold">{item.track.name}</h3>
+                <p className="text-sm text-gray-400">
+                  {item.track.artists.map((artist) => artist.name).join(", ")}
+                </p>
               </div>
             ))}
           </div>

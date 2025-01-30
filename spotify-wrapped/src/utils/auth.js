@@ -1,7 +1,7 @@
 const CLIENT_ID = "fa3034bb76b34ca2bdf43cbfa0edd739";
 const REDIRECT_URI = "http://localhost:3000/callback";
 
-// Add necessary scopes for Web Playback SDK
+// Add necessary scopes for Web Playback SDK and other actions
 const SCOPES = [
   "user-top-read",               // Access to top tracks and artists
   "playlist-read-private",       // Access to private playlists
@@ -9,6 +9,9 @@ const SCOPES = [
   "streaming",                   // Allow streaming
   "user-read-playback-state",    // Allow reading playback state
   "user-modify-playback-state",  // Allow modifying playback state
+  "user-read-recently-played",   // Allow reading recently played
+  "user-read-currently-playing", // Allow access to currently playing track
+  "app-remote-control",          // Allow remote control for playback
 ];
 
 export const getSpotifyAuthURL = () => {

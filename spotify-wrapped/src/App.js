@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import ShareableCards from "./pages/shareableCards";
 import NotFound from "./pages/NotFound";
 
 const Callback = () => {
@@ -35,6 +36,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/shareable-cards" element={<ShareableCards />} />
         <Route path="/callback" element={<Callback />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
