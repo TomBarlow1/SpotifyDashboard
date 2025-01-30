@@ -7,6 +7,7 @@ const ShareableCards = () => {
   const [topArtists, setTopArtists] = useState([]);
   const [minutesListened, setMinutesListened] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState("medium_term"); // Default to 'medium_term'
   const navigate = useNavigate();  // useNavigate hook to navigate between pages
   const token = localStorage.getItem("spotify_token");
 
@@ -20,16 +21,16 @@ const ShareableCards = () => {
       try {
         setLoading(true);
 
-        // Fetch Top 5 Tracks
+        // Fetch Top 5 Tracks based on the selected time range
         const tracksResponse = await axios.get(
-          `https://api.spotify.com/v1/me/top/tracks?time_range=medium_term&limit=5`,
+          `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=5`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setTopTracks(tracksResponse.data.items);
 
-        // Fetch Top 5 Artists
+        // Fetch Top 5 Artists based on the selected time range
         const artistsResponse = await axios.get(
-          `https://api.spotify.com/v1/me/top/artists?time_range=medium_term&limit=5`,
+          `https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}&limit=5`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setTopArtists(artistsResponse.data.items);
@@ -55,7 +56,11 @@ const ShareableCards = () => {
     };
 
     fetchData();
-  }, [token, navigate]);
+  }, [token, timeRange, navigate]);
+
+  const handleTimeRangeChange = (range) => {
+    setTimeRange(range);
+  };
 
   if (loading) {
     return (
@@ -68,6 +73,20 @@ const ShareableCards = () => {
   return (
     <div className="bg-gray-900 text-white min-h-screen p-6">
       <h1 className="text-4xl font-bold mb-8 text-center">Your Shareable Stats</h1>
+
+      <div className="mb-8 flex justify-center space-x-4">
+        {["short_term", "medium_term", "long_term"].map((range) => (
+          <button
+            key={range}
+            onClick={() => handleTimeRangeChange(range)}
+            className={`px-4 py-2 rounded ${
+              timeRange === range ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
+            }`}
+          >
+            {range === "short_term" ? "1 Week" : range === "medium_term" ? "4 Weeks" : "1 Year"}
+          </button>
+        ))}
+      </div>
 
       <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold mb-4">Top 5 Tracks</h2>
