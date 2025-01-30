@@ -5,6 +5,7 @@ const REDIRECT_URI = "http://localhost:3000/callback";
 const SCOPES = [
   "user-top-read",               // Access to top tracks and artists
   "playlist-read-private",       // Access to private playlists
+  "playlist-read-collaborative", // Access to collaborative playlists
   "playlist-modify-public",      // Modify public playlists (for playlist generation)
   "playlist-modify-private",     // Modify private playlists (for playlist generation)
   "user-library-read",           // Access to user's library

@@ -62,3 +62,25 @@
     cursor: pointer;
   }
   
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-spin-slow {
+    animation: spin 4s linear infinite;
+  }
+  
+  .album-cover img {
+    transition: transform 0.3s ease;
+  }
+  
+  .album-cover img:hover {
+    transform: scale(1.1);
+  }
+  
