@@ -3,13 +3,11 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import SpotifyPlayer from "../components/SpotifyPlayer";
 
-
-
 const Dashboard = () => {
   const [topTracks, setTopTracks] = useState([]);
   const [topArtists, setTopArtists] = useState([]);
   const [genres, setGenres] = useState([]);
-  const [recentlyPlayed, setRecentlyPlayed] = useState([]); // State for recently played tracks
+  const [recentlyPlayed, setRecentlyPlayed] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("short_term");
   const [trackUri, setTrackUri] = useState(null);
@@ -70,6 +68,11 @@ const Dashboard = () => {
     fetchData();
   }, [token, timeRange, navigate]);
 
+  const formatDuration = (durationMs) => {
+    const durationInMinutes = Math.round(durationMs / 60000);
+    return durationInMinutes;
+  };
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-900 text-white">
@@ -95,8 +98,6 @@ const Dashboard = () => {
           </button>
         ))}
       </div>
-
-      
 
       <div className="mb-8 flex justify-center space-x-4">
         <button
@@ -162,6 +163,9 @@ const Dashboard = () => {
                 <p className="text-sm text-gray-400">
                   {track.artists.map((artist) => artist.name).join(", ")}
                 </p>
+                <p className="text-sm text-gray-300">
+                  {formatDuration(track.duration_ms)} minutes
+                </p>
               </div>
             ))}
           </div>
@@ -221,6 +225,9 @@ const Dashboard = () => {
                 <h3 className="text-lg font-bold">{item.track.name}</h3>
                 <p className="text-sm text-gray-400">
                   {item.track.artists.map((artist) => artist.name).join(", ")}
+                </p>
+                <p className="text-sm text-gray-300">
+                  {formatDuration(item.track.duration_ms)} minutes
                 </p>
               </div>
             ))}

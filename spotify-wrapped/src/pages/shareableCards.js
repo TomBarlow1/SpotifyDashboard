@@ -7,7 +7,7 @@ const ShareableCards = () => {
   const [topArtists, setTopArtists] = useState([]);
   const [minutesListened, setMinutesListened] = useState(0);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const navigate = useNavigate();  // useNavigate hook to navigate between pages
   const token = localStorage.getItem("spotify_token");
 
   useEffect(() => {
@@ -36,7 +36,7 @@ const ShareableCards = () => {
 
         // Fetch Total Minutes Listened (last 30 days)
         const historyResponse = await axios.get(
-          `https://api.spotify.com/v1/me/player/recently-played?limit=100`,
+          `https://api.spotify.com/v1/me/player/recently-played?limit=48`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const totalMinutes = historyResponse.data.items.reduce((acc, item) => {
@@ -108,6 +108,16 @@ const ShareableCards = () => {
 
         <h2 className="text-2xl font-semibold mb-4">Total Minutes Listened</h2>
         <p className="text-lg">{minutesListened} minutes</p>
+      </div>
+
+      {/* Back to Dashboard Button */}
+      <div className="mt-6 text-center">
+        <button
+          onClick={() => navigate("/dashboard")} // Navigate back to the dashboard
+          className="px-6 py-3 bg-green-500 text-white font-bold rounded-md hover:bg-green-600"
+        >
+          Back to Dashboard
+        </button>
       </div>
     </div>
   );
