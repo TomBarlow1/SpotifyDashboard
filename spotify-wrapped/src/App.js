@@ -4,6 +4,8 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ShareableCards from "./pages/shareableCards";
 import NotFound from "./pages/NotFound";
+import PlaylistGenerator from "./pages/PlaylistGenerator"; 
+
 
 const Callback = () => {
   const navigate = useNavigate();
@@ -37,6 +39,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/shareable-cards" element={<ShareableCards />} />
+        <Route path="/playlist-generator" element={<PlaylistGenerator />} />
         <Route path="/callback" element={<Callback />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
