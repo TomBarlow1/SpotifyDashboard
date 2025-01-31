@@ -156,11 +156,11 @@ const Dashboard = () => {
             </button>
           </Link>
 
-          <Link to="/recommendations">
-            <button className="block w-full text-left px-4 py-2 rounded mb-2 bg-blue-500 text-white hover:bg-blue-400">
-              View Recommendations
-            </button>
-          </Link>
+         {/* <Link to="/recommendations">
+  <button className="block w-full text-left px-4 py-2 rounded mb-2 bg-blue-500 text-white hover:bg-blue-400">
+    View Recommendations
+  </button>
+</Link> */}
 
           <Link to="/playlist-generator">
             <button className="block w-full text-left px-4 py-2 rounded mb-2 bg-blue-500 text-white hover:bg-blue-400">

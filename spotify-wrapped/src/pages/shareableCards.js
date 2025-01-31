@@ -1,15 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toJpeg } from 'html-to-image';
+import SocialShare from '../components/SocialShare';
+import Card from '../components/card';
+import Modal from 'react-modal';
 
 const ShareableCards = () => {
   const [topTracks, setTopTracks] = useState([]);
   const [topArtists, setTopArtists] = useState([]);
-  const [minutesListened, setMinutesListened] = useState(0);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("medium_term"); // Default to 'medium_term'
+  const [view, setView] = useState("topTracks"); // Default view
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [modalContent, setModalContent] = useState(null);
   const navigate = useNavigate();  // useNavigate hook to navigate between pages
   const token = localStorage.getItem("spotify_token");
+  const cardRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,17 +42,6 @@ const ShareableCards = () => {
         );
         setTopArtists(artistsResponse.data.items);
 
-        // Fetch Total Minutes Listened (last 30 days)
-        const historyResponse = await axios.get(
-          `https://api.spotify.com/v1/me/player/recently-played?limit=48`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const totalMinutes = historyResponse.data.items.reduce((acc, item) => {
-          const trackDuration = item.track.duration_ms / 60000; // Convert milliseconds to minutes
-          return acc + trackDuration;
-        }, 0);
-        setMinutesListened(Math.round(totalMinutes));
-
         setLoading(false);
       } catch (error) {
         if (error.response?.status === 401) {
@@ -60,6 +56,108 @@ const ShareableCards = () => {
 
   const handleTimeRangeChange = (range) => {
     setTimeRange(range);
+  };
+
+  const handleViewChange = (newView) => {
+    setView(newView);
+    openModal(newView);
+  };
+
+  const handleDownload = () => {
+    if (cardRef.current) {
+      toJpeg(cardRef.current, { quality: 0.95 })
+        .then((dataUrl) => {
+          const link = document.createElement('a');
+          link.download = 'shareable-card.jpeg';
+          link.href = dataUrl;
+          link.click();
+        });
+    }
+  };
+
+  const openModal = (content) => {
+    let modalContent;
+    if (content === "topTracks") {
+      modalContent = (
+        <>
+          <h2 className="text-2xl font-semibold mb-4">Top 5 Tracks</h2>
+          <div className="mb-4" ref={cardRef}>
+            {topTracks.map((track) => (
+              <Card
+                key={track.id}
+                image={track.album.images[0]?.url}
+                title={track.name}
+                subtitle={track.artists.map((artist) => artist.name).join(", ")}
+              />
+            ))}
+          </div>
+          <button
+            onClick={handleDownload}
+            className="px-6 py-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 mr-4"
+          >
+            Download as JPEG
+          </button>
+        </>
+      );
+    } else if (content === "topArtists") {
+      modalContent = (
+        <>
+          <h2 className="text-2xl font-semibold mb-4">Top 5 Artists</h2>
+          <div className="mb-4" ref={cardRef}>
+            {topArtists.map((artist) => (
+              <Card
+                key={artist.id}
+                image={artist.images[0]?.url}
+                title={artist.name}
+                subtitle={artist.genres[0]}
+              />
+            ))}
+          </div>
+          <button
+            onClick={handleDownload}
+            className="px-6 py-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 mr-4"
+          >
+            Download as JPEG
+          </button>
+        </>
+      );
+    } else if (content === "topSongsPerArtist") {
+      modalContent = (
+        <>
+          <h2 className="text-2xl font-semibold mb-4">Top Songs Per Artist</h2>
+          <div className="mb-4" ref={cardRef}>
+            {topArtists.map((artist) => (
+              <div key={artist.id} className="mb-4">
+                <h3 className="text-xl font-bold mb-2">{artist.name}</h3>
+                {topTracks
+                  .filter((track) => track.artists.some((trackArtist) => trackArtist.id === artist.id))
+                  .map((track) => (
+                    <Card
+                      key={track.id}
+                      image={track.album.images[0]?.url}
+                      title={track.name}
+                      subtitle={track.artists.map((trackArtist) => trackArtist.name).join(", ")}
+                    />
+                  ))}
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={handleDownload}
+            className="px-6 py-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 mr-4"
+          >
+            Download as JPEG
+          </button>
+        </>
+      );
+    }
+    setModalContent(modalContent);
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+    setModalContent(null);
   };
 
   if (loading) {
@@ -88,48 +186,20 @@ const ShareableCards = () => {
         ))}
       </div>
 
-      <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-semibold mb-4">Top 5 Tracks</h2>
-        <div className="mb-4">
-          {topTracks.map((track) => (
-            <div key={track.id} className="flex items-center mb-2">
-              <img
-                src={track.album.images[0]?.url}
-                alt={track.name}
-                className="w-16 h-16 object-cover rounded-full mr-4"
-              />
-              <div>
-                <h3 className="text-xl font-bold">{track.name}</h3>
-                <p className="text-sm text-gray-400">
-                  {track.artists.map((artist) => artist.name).join(", ")}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <h2 className="text-2xl font-semibold mb-4">Top 5 Artists</h2>
-        <div className="mb-4">
-          {topArtists.map((artist) => (
-            <div key={artist.id} className="flex items-center mb-2">
-              <img
-                src={artist.images[0]?.url}
-                alt={artist.name}
-                className="w-16 h-16 object-cover rounded-full mr-4"
-              />
-              <div>
-                <h3 className="text-xl font-bold">{artist.name}</h3>
-                <p className="text-sm text-gray-400">{artist.genres[0]}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <h2 className="text-2xl font-semibold mb-4">Total Minutes Listened</h2>
-        <p className="text-lg">{minutesListened} minutes</p>
+      <div className="mb-8 flex justify-center space-x-4">
+        {["topTracks", "topArtists", "topSongsPerArtist"].map((viewOption) => (
+          <button
+            key={viewOption}
+            onClick={() => handleViewChange(viewOption)}
+            className={`px-4 py-2 rounded ${
+              view === viewOption ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
+            }`}
+          >
+            {viewOption === "topTracks" ? "Top Tracks" : viewOption === "topArtists" ? "Top Artists" : "Top Songs Per Artist"}
+          </button>
+        ))}
       </div>
 
-      {/* Back to Dashboard Button */}
       <div className="mt-6 text-center">
         <button
           onClick={() => navigate("/dashboard")} // Navigate back to the dashboard
@@ -138,6 +208,17 @@ const ShareableCards = () => {
           Back to Dashboard
         </button>
       </div>
+
+      <SocialShare url={window.location.href} />
+
+      {modalIsOpen && (
+        <Modal isOpen={modalIsOpen} onRequestClose={closeModal} className="modal" overlayClassName="overlay">
+          <div className="bg-gray-900 p-6 rounded-lg shadow-lg text-white">
+            <button onClick={closeModal} className="float-right text-white text-2xl">&times;</button>
+            {modalContent}
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };
