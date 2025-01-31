@@ -2,10 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import SpotifyPlayer from "../components/SpotifyPlayer"; // Import the SpotifyPlayer component
-import Modal from 'react-modal';
-import SongInfo from './SongInfo';
-
-Modal.setAppElement('#root');
 
 const PlaylistGenerator = () => {
   const [playlists, setPlaylists] = useState([]);
@@ -15,8 +11,6 @@ const PlaylistGenerator = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [trackUri, setTrackUri] = useState(null); // Store the URI of the selected track to play
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [selectedTrack, setSelectedTrack] = useState(null);
   const token = localStorage.getItem("spotify_token");
   const navigate = useNavigate();
 
@@ -98,14 +92,8 @@ const PlaylistGenerator = () => {
   };
 
   // Handle track selection to play the song
-  const handleTrackClick = (track) => {
-    setSelectedTrack(track);
-    setModalIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setModalIsOpen(false);
-    setSelectedTrack(null);
+  const handleTrackClick = (trackUri) => {
+    setTrackUri(trackUri); // Set the URI of the selected track
   };
 
   // Generate a playlist based on user tracks (for example, top tracks)
@@ -181,7 +169,7 @@ const PlaylistGenerator = () => {
               <div
                 key={track.track.id}
                 className="bg-gray-800 p-4 rounded cursor-pointer hover:bg-gray-700 transition duration-300"
-                onClick={() => handleTrackClick(track.track)} // Pass track to the modal
+                onClick={() => handleTrackClick(track.track.uri)} // Pass track URI to the player
               >
                 <img
                   src={track.track.album.images[0]?.url}
@@ -217,7 +205,7 @@ const PlaylistGenerator = () => {
               <div
                 key={track.id}
                 className="bg-gray-800 p-4 rounded cursor-pointer hover:bg-gray-700 transition duration-300"
-                onClick={() => handleTrackClick(track)} // Pass track to the modal
+                onClick={() => handleTrackClick(track.uri)} // Pass track URI to the player
               >
                 <img
                   src={track.album.images[0]?.url}
@@ -233,16 +221,6 @@ const PlaylistGenerator = () => {
           </div>
         </div>
       )}
-
-      <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={closeModal}
-        contentLabel="Song Info"
-        className="modal"
-        overlayClassName="overlay"
-      >
-        {selectedTrack && <SongInfo track={selectedTrack} />}
-      </Modal>
     </div>
   );
 };
