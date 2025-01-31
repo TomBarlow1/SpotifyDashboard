@@ -71,7 +71,7 @@ const ShareableCards = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen p-6">
+    <div className="bg-black text-white min-h-screen p-6 font-sans">
       <h1 className="text-4xl font-bold mb-8 text-center">Your Shareable Stats</h1>
 
       <div className="mb-8 flex justify-center space-x-4">

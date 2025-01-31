@@ -14,8 +14,8 @@ const refreshAccessToken = async () => {
     throw new Error("No refresh token found");
   }
 
-  const CLIENT_ID = "your-client-id"; // Replace with your actual client ID
-  const CLIENT_SECRET = "your-client-secret"; // Replace with your actual client secret
+  const CLIENT_ID = "fa3034bb76b34ca2bdf43cbfa0edd739"; // Replace with your actual client ID
+  const CLIENT_SECRET = "43b8a91128d440319166a27aa3e72c55"; // Replace with your actual client secret
 
   try {
     const response = await axios.post(

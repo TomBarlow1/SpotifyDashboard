@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import SpotifyPlayer from "../components/SpotifyPlayer";
+import Modal from 'react-modal';
+import SongInfo from './SongInfo';
+
+Modal.setAppElement('#root');
 
 const Dashboard = () => {
   const [topTracks, setTopTracks] = useState([]);
   const [topArtists, setTopArtists] = useState([]);
   const [genres, setGenres] = useState([]);
-  const [recentlyPlayed, setRecentlyPlayed] = useState([]); 
+  const [recentlyPlayed, setRecentlyPlayed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("short_term");
-  const [trackUri, setTrackUri] = useState(null);
   const [activeTab, setActiveTab] = useState("tracks");
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [selectedTrack, setSelectedTrack] = useState(null);
   const navigate = useNavigate();
   const token = localStorage.getItem("spotify_token");
 
@@ -73,6 +77,16 @@ const Dashboard = () => {
     return durationInMinutes;
   };
 
+  const handleTrackClick = (track) => {
+    setSelectedTrack(track);
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+    setSelectedTrack(null);
+  };
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-900 text-white">
@@ -82,165 +96,182 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen p-6">
-      <h1 className="text-4xl font-bold mb-8">Welcome to Your Spotify Dashboard</h1>
+    <div className="bg-black text-white min-h-screen p-6 font-sans flex">
+      <div className="w-1/4 pr-4">
+        <h1 className="text-4xl font-bold mb-8">Your Spotify Dashboard</h1>
 
-      <div className="mb-8 flex justify-center space-x-4">
-        {["short_term", "medium_term", "long_term"].map((range) => (
+        <div className="mb-8">
+          {["short_term", "medium_term", "long_term"].map((range) => (
+            <button
+              key={range}
+              onClick={() => setTimeRange(range)}
+              className={`block w-full text-left px-4 py-2 rounded mb-2 ${
+                timeRange === range ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
+              }`}
+            >
+              {range === "short_term" ? "1 Week" : range === "medium_term" ? "4 Weeks" : "1 Year"}
+            </button>
+          ))}
+        </div>
+
+        <div className="mb-8">
           <button
-            key={range}
-            onClick={() => setTimeRange(range)}
-            className={`px-4 py-2 rounded ${
-              timeRange === range ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
+            onClick={() => setActiveTab("tracks")}
+            className={`block w-full text-left px-4 py-2 rounded mb-2 ${
+              activeTab === "tracks" ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
             }`}
           >
-            {range === "short_term" ? "1 Week" : range === "medium_term" ? "4 Weeks" : "1 Year"}
+            Top Tracks
           </button>
-        ))}
-      </div>
-
-      <div className="mb-8 flex justify-center space-x-4">
-        <button
-          onClick={() => setActiveTab("tracks")}
-          className={`px-4 py-2 rounded ${
-            activeTab === "tracks" ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
-          }`}
-        >
-          Top Tracks
-        </button>
-        <button
-          onClick={() => setActiveTab("genres")}
-          className={`px-4 py-2 rounded ${
-            activeTab === "genres" ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
-          }`}
-        >
-          Top Genres
-        </button>
-        <button
-          onClick={() => setActiveTab("artists")}
-          className={`px-4 py-2 rounded ${
-            activeTab === "artists" ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
-          }`}
-        >
-          Top Artists
-        </button>
-        <button
-          onClick={() => setActiveTab("recentlyPlayed")}
-          className={`px-4 py-2 rounded ${
-            activeTab === "recentlyPlayed" ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
-          }`}
-        >
-          Recently Played
-        </button>
-      </div>
-
-      <div className="mb-8 flex justify-center space-x-4">
-        <Link to="/shareable-cards">
-          <button className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-400">
-            Shareable Cards
+          <button
+            onClick={() => setActiveTab("genres")}
+            className={`block w-full text-left px-4 py-2 rounded mb-2 ${
+              activeTab === "genres" ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
+            }`}
+          >
+            Top Genres
           </button>
-        </Link>
+          <button
+            onClick={() => setActiveTab("artists")}
+            className={`block w-full text-left px-4 py-2 rounded mb-2 ${
+              activeTab === "artists" ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
+            }`}
+          >
+            Top Artists
+          </button>
+          <button
+            onClick={() => setActiveTab("recentlyPlayed")}
+            className={`block w-full text-left px-4 py-2 rounded mb-2 ${
+              activeTab === "recentlyPlayed" ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
+            }`}
+          >
+            Recently Played
+          </button>
+        </div>
+
+        <div className="mb-8">
+          <Link to="/shareable-cards">
+            <button className="block w-full text-left px-4 py-2 rounded mb-2 bg-blue-500 text-white hover:bg-blue-400">
+              Shareable Cards
+            </button>
+          </Link>
+
+          <Link to="/recommendations">
+            <button className="block w-full text-left px-4 py-2 rounded mb-2 bg-blue-500 text-white hover:bg-blue-400">
+              View Recommendations
+            </button>
+          </Link>
+
+          <Link to="/playlist-generator">
+            <button className="block w-full text-left px-4 py-2 rounded mb-2 bg-blue-500 text-white hover:bg-blue-400">
+              Playlist Generator
+            </button>
+          </Link>
+        </div>
       </div>
 
-      <Link to="/playlist-generator">
-  <button className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-400">
-     Playlists
-  </button>
-</Link>
-
-
-      <SpotifyPlayer token={token} trackUri={trackUri} />
-
-      {activeTab === "tracks" && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4">Your Top Tracks</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {topTracks.map((track) => (
-              <div
-                key={track.id}
-                className="bg-gray-800 p-4 rounded cursor-pointer hover:bg-gray-700 transition duration-300"
-                onClick={() => setTrackUri(track.uri)}
-              >
-                <img
-                  src={track.album.images[0]?.url}
-                  alt={track.name}
-                  className="w-full h-40 object-cover rounded mb-2"
-                />
-                <h3 className="text-lg font-bold">{track.name}</h3>
-                <p className="text-sm text-gray-400">
-                  {track.artists.map((artist) => artist.name).join(", ")}
-                </p>
-                <p className="text-sm text-gray-300">
-                  {formatDuration(track.duration_ms)} minutes
-                </p>
-              </div>
-            ))}
+      <div className="w-3/4">
+        {activeTab === "tracks" && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-semibold mb-4">Your Top Tracks</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {topTracks.map((track) => (
+                <div
+                  key={track.id}
+                  className="bg-gray-800 p-4 rounded cursor-pointer hover:bg-gray-700 transition duration-300"
+                  onClick={() => handleTrackClick(track)}
+                >
+                  <img
+                    src={track.album.images[0]?.url}
+                    alt={track.name}
+                    className="w-full h-40 object-cover rounded mb-2"
+                  />
+                  <h3 className="text-lg font-bold">{track.name}</h3>
+                  <p className="text-sm text-gray-400">
+                    {track.artists.map((artist) => artist.name).join(", ")}
+                  </p>
+                  <p className="text-sm text-gray-300">
+                    {formatDuration(track.duration_ms)} minutes
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {activeTab === "genres" && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4">Your Top Genres</h2>
-          <div className="flex flex-wrap gap-2">
-            {genres.map((genre, index) => (
-              <span
-                key={index}
-                className="px-4 py-2 bg-gray-800 text-gray-300 rounded-full text-sm font-semibold"
-              >
-                {genre}
-              </span>
-            ))}
+        {activeTab === "genres" && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-semibold mb-4">Your Top Genres</h2>
+            <div className="flex flex-wrap gap-2">
+              {genres.map((genre, index) => (
+                <span
+                  key={index}
+                  className="px-4 py-2 bg-gray-800 text-gray-300 rounded-full text-sm font-semibold"
+                >
+                  {genre}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {activeTab === "artists" && (
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Your Top Artists</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {topArtists.map((artist) => (
-              <div key={artist.id} className="bg-gray-800 p-4 rounded">
-                <img
-                  src={artist.images[0]?.url}
-                  alt={artist.name}
-                  className="w-full h-40 object-cover rounded mb-2"
-                />
-                <h3 className="text-lg font-bold">{artist.name}</h3>
-                <p className="text-sm text-gray-400">{artist.genres.slice(0, 2).join(", ")}</p>
-              </div>
-            ))}
+        {activeTab === "artists" && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Your Top Artists</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {topArtists.map((artist) => (
+                <div key={artist.id} className="bg-gray-800 p-4 rounded">
+                  <img
+                    src={artist.images[0]?.url}
+                    alt={artist.name}
+                    className="w-full h-40 object-cover rounded mb-2"
+                  />
+                  <h3 className="text-lg font-bold">{artist.name}</h3>
+                  <p className="text-sm text-gray-400">{artist.genres.slice(0, 2).join(", ")}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {activeTab === "recentlyPlayed" && (
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Recently Played Tracks</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {recentlyPlayed.map((item, index) => (
-              <div
-                key={index}
-                className="bg-gray-800 p-4 rounded cursor-pointer hover:bg-gray-700 transition duration-300"
-                onClick={() => setTrackUri(item.track.uri)}
-              >
-                <img
-                  src={item.track.album.images[0]?.url}
-                  alt={item.track.name}
-                  className="w-full h-40 object-cover rounded mb-2"
-                />
-                <h3 className="text-lg font-bold">{item.track.name}</h3>
-                <p className="text-sm text-gray-400">
-                  {item.track.artists.map((artist) => artist.name).join(", ")}
-                </p>
-                <p className="text-sm text-gray-300">
-                  {formatDuration(item.track.duration_ms)} minutes
-                </p>
-              </div>
-            ))}
+        {activeTab === "recentlyPlayed" && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Recently Played Tracks</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {recentlyPlayed.map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-800 p-4 rounded cursor-pointer hover:bg-gray-700 transition duration-300"
+                  onClick={() => handleTrackClick(item.track)}
+                >
+                  <img
+                    src={item.track.album.images[0]?.url}
+                    alt={item.track.name}
+                    className="w-full h-40 object-cover rounded mb-2"
+                  />
+                  <h3 className="text-lg font-bold">{item.track.name}</h3>
+                  <p className="text-sm text-gray-400">
+                    {item.track.artists.map((artist) => artist.name).join(", ")}
+                  </p>
+                  <p className="text-sm text-gray-300">
+                    {formatDuration(item.track.duration_ms)} minutes
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        contentLabel="Song Info"
+        className="modal"
+        overlayClassName="overlay"
+      >
+        {selectedTrack && <SongInfo track={selectedTrack} />}
+      </Modal>
     </div>
   );
 };

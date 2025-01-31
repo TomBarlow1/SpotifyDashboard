@@ -16,8 +16,9 @@ const SCOPES = [
   "user-read-recently-played",   // Allow reading recently played
   "user-read-currently-playing", // Allow access to currently playing track
   "app-remote-control",          // Allow remote control for playback
+  "user-read-private",           // Access to user's subscription details
+  "user-read-email"              // Access to user's email address
 ];
-
 
 export const getSpotifyAuthURL = () => {
   const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
