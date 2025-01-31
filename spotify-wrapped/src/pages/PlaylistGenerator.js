@@ -118,6 +118,14 @@ const PlaylistGenerator = () => {
 
   return (
     <div className="bg-gray-900 text-white min-h-screen p-6">
+      {/* Back to Dashboard Button */}
+      <button
+        onClick={() => navigate("/dashboard")}
+        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition duration-300 mb-6"
+      >
+        Back to Dashboard
+      </button>
+
       <h1 className="text-4xl font-bold mb-8">Your Playlists & Generated Playlist</h1>
 
       {/* Error handling */}
