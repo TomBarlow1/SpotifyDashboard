@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import Modal from 'react-modal';
 import SongInfo from './SongInfo';
+import SpotifyPlayer from '../components/SpotifyPlayer';
 
 Modal.setAppElement('#root');
 
@@ -11,6 +12,7 @@ const Dashboard = () => {
   const [topArtists, setTopArtists] = useState([]);
   const [genres, setGenres] = useState([]);
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
+  const [likedSongs, setLikedSongs] = useState([]); // New state for liked songs
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("short_term");
   const [activeTab, setActiveTab] = useState("tracks");
@@ -59,6 +61,12 @@ const Dashboard = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setRecentlyPlayed(recentlyPlayedResponse.data.items);
+
+        const likedSongsResponse = await axios.get(
+          "https://api.spotify.com/v1/me/tracks?limit=48",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setLikedSongs(likedSongsResponse.data.items);
 
         setLoading(false);
       } catch (error) {
@@ -147,6 +155,14 @@ const Dashboard = () => {
           >
             Recently Played
           </button>
+          <button
+            onClick={() => setActiveTab("likedSongs")}
+            className={`block w-full text-left px-4 py-2 rounded mb-2 ${
+              activeTab === "likedSongs" ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
+            }`}
+          >
+            Liked Songs
+          </button>
         </div>
 
         <div className="mb-8">
@@ -155,12 +171,6 @@ const Dashboard = () => {
               Shareable Cards
             </button>
           </Link>
-
-         {/* <Link to="/recommendations">
-  <button className="block w-full text-left px-4 py-2 rounded mb-2 bg-blue-500 text-white hover:bg-blue-400">
-    View Recommendations
-  </button>
-</Link> */}
 
           <Link to="/playlist-generator">
             <button className="block w-full text-left px-4 py-2 rounded mb-2 bg-blue-500 text-white hover:bg-blue-400">
@@ -261,6 +271,34 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
+        {activeTab === "likedSongs" && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Your Liked Songs</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {likedSongs.map((item) => (
+                <div
+                  key={item.track.id}
+                  className="bg-gray-800 p-4 rounded cursor-pointer hover:bg-gray-700 transition duration-300"
+                  onClick={() => handleTrackClick(item.track)}
+                >
+                  <img
+                    src={item.track.album.images[0]?.url}
+                    alt={item.track.name}
+                    className="w-full h-40 object-cover rounded mb-2"
+                  />
+                  <h3 className="text-lg font-bold">{item.track.name}</h3>
+                  <p className="text-sm text-gray-400">
+                    {item.track.artists.map((artist) => artist.name).join(", ")}
+                  </p>
+                  <p className="text-sm text-gray-300">
+                    Added on: {new Date(item.added_at).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <Modal
@@ -272,6 +310,7 @@ const Dashboard = () => {
       >
         {selectedTrack && <SongInfo track={selectedTrack} />}
       </Modal>
+      <SpotifyPlayer token={token} trackUri={selectedTrack?.uri} />
     </div>
   );
 };

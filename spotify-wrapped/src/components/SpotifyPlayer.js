@@ -82,15 +82,22 @@ const SpotifyPlayer = ({ token, trackUri }) => {
   };
 
   return (
-    <div className="spotify-player">
+    <div className="spotify-player fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 flex items-center justify-between">
+      <div className="album-cover">
+        {playerState?.track_window?.current_track?.album?.images[0]?.url && (
+          <img
+            src={playerState.track_window.current_track.album.images[0].url}
+            alt="Album cover"
+            className="w-16 h-16 object-cover rounded"
+          />
+        )}
+      </div>
       <div className="controls flex items-center">
-        <button onClick={handlePlayPause} className="button">
+        <button onClick={handlePlayPause} className="button bg-green-500 text-white p-2 rounded-full">
           {isPlaying ? "Pause" : "Play"}
         </button>
       </div>
-
-      {/* Song Progress */}
-      <div className="progress-container flex items-center">
+      <div className="progress-container flex items-center w-full mx-4">
         <span className="time">{formatTime(progress)}</span>
         <input
           type="range"
@@ -98,7 +105,7 @@ const SpotifyPlayer = ({ token, trackUri }) => {
           max={playerState?.duration || 1}
           value={progress}
           onChange={handleProgressBarChange}
-          className="progress-bar mx-2"
+          className="progress-bar mx-2 w-full"
         />
         <span className="time">{formatTime(playerState?.duration || 0)}</span>
       </div>
