@@ -1,9 +1,12 @@
+
 module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}", // Your files where Tailwind classes will be used
-  ],
+  purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
+  darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {},
   },
+  variants: {
+    extend: {},
+  },
   plugins: [],
-};
+}
