@@ -177,6 +177,12 @@ const Dashboard = () => {
               Playlist Generator
             </button>
           </Link>
+
+          <Link to="/music-quiz">
+            <button className="block w-full text-left px-4 py-2 rounded mb-2 bg-blue-500 text-white hover:bg-blue-400">
+              Music Quiz
+            </button>
+          </Link>
         </div>
       </div>
 

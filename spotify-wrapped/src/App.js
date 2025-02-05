@@ -7,6 +7,7 @@ import NotFound from "./pages/NotFound";
 import PlaylistGenerator from "./pages/PlaylistGenerator"; 
 import Recommendations from "./pages/Recommendations";
 import SongInfo from './pages/SongInfo';
+import MusicQuiz from './pages/MusicQuiz';
 
 
 const Callback = () => {
@@ -44,6 +45,7 @@ function App() {
         <Route path="/playlist-generator" element={<PlaylistGenerator />} />
         <Route path="/song-info" element={<SongInfo />} />
         <Route path="/recommendations" element={<Recommendations />} />
+        <Route path="/music-quiz" element={<MusicQuiz />} /> 
         <Route path="/callback" element={<Callback />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
