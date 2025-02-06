@@ -8,6 +8,7 @@ import PlaylistGenerator from "./pages/PlaylistGenerator";
 import Recommendations from "./pages/Recommendations";
 import SongInfo from './pages/SongInfo';
 import MusicQuiz from './pages/MusicQuiz';
+import Awards from './pages/Awards';
 
 
 const Callback = () => {
@@ -46,6 +47,7 @@ function App() {
         <Route path="/song-info" element={<SongInfo />} />
         <Route path="/recommendations" element={<Recommendations />} />
         <Route path="/music-quiz" element={<MusicQuiz />} /> 
+        <Route path="/awards" element={<Awards />} /> 
         <Route path="/callback" element={<Callback />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

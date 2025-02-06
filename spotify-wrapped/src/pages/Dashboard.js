@@ -12,7 +12,7 @@ const Dashboard = () => {
   const [topArtists, setTopArtists] = useState([]);
   const [genres, setGenres] = useState([]);
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
-  const [likedSongs, setLikedSongs] = useState([]); // New state for liked songs
+  const [likedSongs, setLikedSongs] = useState([]);// New state for awards
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("short_term");
   const [activeTab, setActiveTab] = useState("tracks");
@@ -20,6 +20,7 @@ const Dashboard = () => {
   const [selectedTrack, setSelectedTrack] = useState(null);
   const navigate = useNavigate();
   const token = localStorage.getItem("spotify_token");
+  const userId = localStorage.getItem("user_id"); // Assuming you have user_id stored in localStorage
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,6 +69,7 @@ const Dashboard = () => {
         );
         setLikedSongs(likedSongsResponse.data.items);
 
+
         setLoading(false);
       } catch (error) {
         if (error.response?.status === 401) {
@@ -78,7 +80,7 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, [token, timeRange, navigate]);
+  }, [token, timeRange, navigate, userId]);
 
   const formatDuration = (durationMs) => {
     const durationInMinutes = Math.round(durationMs / 60000);
@@ -163,6 +165,14 @@ const Dashboard = () => {
           >
             Liked Songs
           </button>
+          <button
+            onClick={() => setActiveTab("awards")}
+            className={`block w-full text-left px-4 py-2 rounded mb-2 ${
+              activeTab === "awards" ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"
+            }`}
+          >
+            Awards
+          </button>
         </div>
 
         <div className="mb-8">
@@ -181,6 +191,12 @@ const Dashboard = () => {
           <Link to="/music-quiz">
             <button className="block w-full text-left px-4 py-2 rounded mb-2 bg-blue-500 text-white hover:bg-blue-400">
               Music Quiz
+            </button>
+          </Link>
+
+          <Link to="/awards">
+            <button className="block w-full text-left px-4 py-2 rounded mb-2 bg-blue-500 text-white hover:bg-blue-400">
+              Awards
             </button>
           </Link>
         </div>
@@ -305,6 +321,7 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
       </div>
 
       <Modal
