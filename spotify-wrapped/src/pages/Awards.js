@@ -19,7 +19,7 @@ const Awards = () => {
       try {
         setLoading(true);
         const awardsResponse = await axios.get(
-          `http://localhost:5000/user/${userId}/awards`,
+          `http://localhost:5001/user/${userId}/awards`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setAwards(awardsResponse.data);
