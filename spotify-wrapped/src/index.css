@@ -3,24 +3,24 @@
 @tailwind utilities;
 
 .dashboard-container {
-  position: relative;
-  min-height: 100vh;
-  padding-bottom: 80px; /* Height of the player */
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-bottom: 80px; /* Prevents content from being hidden behind the player */
 }
 
 .spotify-player {
-  position: fixed;
+  position: sticky;
   bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: #121212;
-  color: white;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 1000;
+  width: 100%;
+  z-index: 10;
 }
+
 
 .album-cover img {
   width: 64px;
@@ -128,3 +128,4 @@
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.75);
   }
+ 
