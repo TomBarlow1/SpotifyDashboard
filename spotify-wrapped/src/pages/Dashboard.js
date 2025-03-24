@@ -18,6 +18,8 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("tracks");
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState(null);
+  const [playTrack, setPlayTrack] = useState(null); // State to hold the track to play
+  const [trackAction, setTrackAction] = useState(null); // State to store selected action for the track
   const navigate = useNavigate();
   const token = localStorage.getItem("spotify_token");
   const userId = localStorage.getItem("user_id"); // Assuming you have user_id stored in localStorage
@@ -89,8 +91,22 @@ const Dashboard = () => {
 
   const handleTrackClick = (track) => {
     setSelectedTrack(track);
-    setModalIsOpen(true);
+    setTrackAction(null); // Reset the action when a new track is clicked
   };
+
+  const handleActionChange = (e) => {
+    const action = e.target.value;
+    setTrackAction(action);
+  
+    if (action === "play") {
+      // Set the track to play
+      setPlayTrack(selectedTrack); // This should trigger the update for the SpotifyPlayer
+    } else if (action === "modal") {
+      // Open the modal
+      setModalIsOpen(true);
+    }
+  };
+  
 
   const closeModal = () => {
     setModalIsOpen(false);
@@ -218,6 +234,19 @@ const Dashboard = () => {
                   <p className="text-sm text-gray-300">
                     {formatDuration(track.duration_ms)} minutes
                   </p>
+                    {/* Dropdown to select action */}
+                    {selectedTrack === track && (
+                    <select
+                      value={trackAction || ""}
+                      onChange={handleActionChange}
+                      className="mt-2 bg-gray-700 text-white p-2 rounded"
+                    >
+                      <option value="">Select Action</option>
+                      <option value="play">Play Song</option>
+                      <option value="modal">Open Song info</option>
+                    </select>
+                  )}
+
                 </div>
               ))}
             </div>
@@ -326,7 +355,7 @@ const Dashboard = () => {
       >
         {selectedTrack && <SongInfo track={selectedTrack} />}
       </Modal>
-      <SpotifyPlayer token={token} trackUri={selectedTrack?.uri} />
+      <SpotifyPlayer token={token} trackUri={playTrack?.uri} />
     </div>
   );
 };
