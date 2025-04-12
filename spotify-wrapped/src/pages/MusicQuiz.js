@@ -1,17 +1,22 @@
+// Import necessary libraries
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
+// Main MusicQuiz component
 const MusicQuiz = () => {
-  const [questions, setQuestions] = useState([]);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [score, setScore] = useState(0);
-  const [quizFinished, setQuizFinished] = useState(false);
-  const token = localStorage.getItem("spotify_token");
+  // State hooks
+  const [questions, setQuestions] = useState([]); // Stores quiz questions
+  const [currentQuestion, setCurrentQuestion] = useState(0); // Tracks current question index
+  const [score, setScore] = useState(0); // User score
+  const [quizFinished, setQuizFinished] = useState(false); // Tracks if quiz is complete
+  const token = localStorage.getItem("spotify_token"); // Get Spotify auth token
 
+  // Fetch data on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Parallel API calls for top artists, top tracks, and recently played
         const [artistsRes, tracksRes, recentlyPlayedRes] = await Promise.all([
           axios.get("https://api.spotify.com/v1/me/top/artists?limit=5&time_range=medium_term", {
             headers: { Authorization: `Bearer ${token}` },
@@ -24,6 +29,7 @@ const MusicQuiz = () => {
           }),
         ]);
 
+        // Format artist, track, and recent track data
         const artists = artistsRes.data.items.map((artist) => ({
           name: artist.name,
           image: artist.images[0]?.url,
@@ -37,22 +43,26 @@ const MusicQuiz = () => {
           image: item.track.album.images[0]?.url,
         }));
 
-        // Analyze data for real stats
+        // Analyze timestamps to get insights
         const timestamps = recentlyPlayedRes.data.items.map((item) => new Date(item.played_at));
         const hours = timestamps.map((timestamp) => timestamp.getHours());
         const mostPlayedTimeOfDay = getMostPlayedTimeOfDay(hours);
         const totalMinutesListened = getTotalMinutesListened(timestamps);
         const mostPlayedDay = getMostPlayedDay(timestamps);
+
+        // Analyze genres
         const genres = artistsRes.data.items.flatMap((artist) => artist.genres);
         const mostListenedGenre = getMostListenedGenre(genres);
         const leastListenedGenre = getLeastListenedGenre(genres);
-        const mostListenedPlaylist = "Playlist 1"; // Placeholder, needs playlist analysis
-        const averageSongEnergy = "Medium"; // Placeholder, needs audio features analysis
-        const mostDanceableSong = tracks[0].name; // Placeholder, needs audio features analysis
-        const musicPreference = "Happy"; // Placeholder, needs audio features analysis
-        const newArtistsDiscovered = "20"; // Placeholder, needs tracking over time
 
-        // Generate dynamic quiz questions
+        // Placeholder values for missing analysis
+        const mostListenedPlaylist = "Playlist 1";
+        const averageSongEnergy = "Medium";
+        const mostDanceableSong = tracks[0].name;
+        const musicPreference = "Happy";
+        const newArtistsDiscovered = "20";
+
+        // Create quiz questions dynamically based on data
         const quizQuestions = [
           {
             question: "Which of these is your most-played artist?",
@@ -92,53 +102,37 @@ const MusicQuiz = () => {
           {
             question: "Which day of the week do you listen to music the most?",
             choices: shuffleArray([
-              { name: "Monday", image: null },
-              { name: "Tuesday", image: null },
-              { name: "Wednesday", image: null },
-              { name: "Thursday", image: null },
-              { name: "Friday", image: null },
-              { name: "Saturday", image: null },
-              { name: "Sunday", image: null },
+              { name: "Monday" }, { name: "Tuesday" }, { name: "Wednesday" },
+              { name: "Thursday" }, { name: "Friday" }, { name: "Saturday" }, { name: "Sunday" },
             ]),
             correct: mostPlayedDay,
           },
           {
             question: "What is your most-listened-to genre?",
             choices: shuffleArray([
-              { name: "Pop", image: null },
-              { name: "Rock", image: null },
-              { name: "Hip-Hop", image: null },
-              { name: "Jazz", image: null },
+              { name: "Pop" }, { name: "Rock" }, { name: "Hip-Hop" }, { name: "Jazz" },
             ]),
             correct: mostListenedGenre,
           },
           {
             question: "Which of these genres do you listen to the LEAST?",
             choices: shuffleArray([
-              { name: "Pop", image: null },
-              { name: "Rock", image: null },
-              { name: "Hip-Hop", image: null },
-              { name: "Jazz", image: null },
+              { name: "Pop" }, { name: "Rock" }, { name: "Hip-Hop" }, { name: "Jazz" },
             ]),
             correct: leastListenedGenre,
           },
           {
             question: "Which playlist do you listen to the most?",
             choices: shuffleArray([
-              { name: "Playlist 1", image: null },
-              { name: "Playlist 2", image: null },
-              { name: "Playlist 3", image: null },
-              { name: "Playlist 4", image: null },
+              { name: "Playlist 1" }, { name: "Playlist 2" },
+              { name: "Playlist 3" }, { name: "Playlist 4" },
             ]),
             correct: mostListenedPlaylist,
           },
           {
             question: "What is your average song energy level?",
             choices: shuffleArray([
-              { name: "Low", image: null },
-              { name: "Medium", image: null },
-              { name: "High", image: null },
-              { name: "Extreme", image: null },
+              { name: "Low" }, { name: "Medium" }, { name: "High" }, { name: "Extreme" },
             ]),
             correct: averageSongEnergy,
           },
@@ -150,10 +144,7 @@ const MusicQuiz = () => {
           {
             question: "Do you prefer happy or sad music?",
             choices: shuffleArray([
-              { name: "Happy", image: null },
-              { name: "Sad", image: null },
-              { name: "Neutral", image: null },
-              { name: "Mixed", image: null },
+              { name: "Happy" }, { name: "Sad" }, { name: "Neutral" }, { name: "Mixed" },
             ]),
             correct: musicPreference,
           },
@@ -165,10 +156,7 @@ const MusicQuiz = () => {
           {
             question: "How many new artists did you discover this month?",
             choices: shuffleArray([
-              { name: "10", image: null },
-              { name: "20", image: null },
-              { name: "30", image: null },
-              { name: "40", image: null },
+              { name: "10" }, { name: "20" }, { name: "30" }, { name: "40" },
             ]),
             correct: newArtistsDiscovered,
           },
@@ -179,6 +167,7 @@ const MusicQuiz = () => {
           },
         ];
 
+        // Set the quiz questions in state
         setQuestions(quizQuestions);
       } catch (error) {
         console.error("Error fetching data", error);
@@ -188,11 +177,14 @@ const MusicQuiz = () => {
     fetchData();
   }, [token]);
 
+  // Handle user answering a question
   const handleAnswer = (answer) => {
+    // Check if the answer is correct
     if (answer === questions[currentQuestion].correct) {
       setScore(score + 1);
     }
 
+    // Move to next question or finish the quiz
     if (currentQuestion + 1 < questions.length) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
@@ -200,14 +192,17 @@ const MusicQuiz = () => {
     }
   };
 
+  // JSX to render the quiz
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
+      {/* Back button */}
       <Link to="/dashboard" className="self-start mb-4">
         <button className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-400">
           Back to Dashboard
         </button>
       </Link>
 
+      {/* Quiz result screen */}
       {quizFinished ? (
         <div className="text-center">
           <h2 className="text-3xl font-bold mb-4">Quiz Finished!</h2>
@@ -219,6 +214,7 @@ const MusicQuiz = () => {
           </Link>
         </div>
       ) : (
+        // Active question screen
         <div className="text-center">
           <h2 className="text-3xl font-bold mb-4">{questions[currentQuestion]?.question}</h2>
           <div className="grid grid-cols-1 gap-4">
@@ -245,20 +241,22 @@ const MusicQuiz = () => {
   );
 };
 
+// Utility: Shuffle array randomly
 const shuffleArray = (array) => {
   return array.sort(() => Math.random() - 0.5);
 };
 
+// Utility: Determine most played time of day
 const getMostPlayedTimeOfDay = (hours) => {
   const counts = hours.reduce((acc, hour) => {
     const timeOfDay = getTimeOfDay(hour);
     acc[timeOfDay] = (acc[timeOfDay] || 0) + 1;
     return acc;
   }, {});
-
   return Object.keys(counts).reduce((a, b) => (counts[a] > counts[b] ? a : b));
 };
 
+// Utility: Convert hour to time of day
 const getTimeOfDay = (hour) => {
   if (hour >= 5 && hour < 12) return "Morning";
   if (hour >= 12 && hour < 17) return "Afternoon";
@@ -266,38 +264,39 @@ const getTimeOfDay = (hour) => {
   return "Late Night";
 };
 
+// Utility: Estimate total minutes listened (3 min per track)
 const getTotalMinutesListened = (timestamps) => {
-  const totalMinutes = timestamps.length * 3; // Assuming average song length is 3 minutes
+  const totalMinutes = timestamps.length * 3;
   return totalMinutes.toString();
 };
 
+// Utility: Find the most active listening weekday
 const getMostPlayedDay = (timestamps) => {
   const days = timestamps.map((timestamp) => timestamp.getDay());
   const counts = days.reduce((acc, day) => {
     acc[day] = (acc[day] || 0) + 1;
     return acc;
   }, {});
-
   const mostPlayedDayIndex = Object.keys(counts).reduce((a, b) => (counts[a] > counts[b] ? a : b));
   const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   return daysOfWeek[mostPlayedDayIndex];
 };
 
+// Utility: Find most listened genre
 const getMostListenedGenre = (genres) => {
   const counts = genres.reduce((acc, genre) => {
     acc[genre] = (acc[genre] || 0) + 1;
     return acc;
   }, {});
-
   return Object.keys(counts).reduce((a, b) => (counts[a] > counts[b] ? a : b));
 };
 
+// Utility: Find least listened genre
 const getLeastListenedGenre = (genres) => {
   const counts = genres.reduce((acc, genre) => {
     acc[genre] = (acc[genre] || 0) + 1;
     return acc;
   }, {});
-
   return Object.keys(counts).reduce((a, b) => (counts[a] < counts[b] ? a : b));
 };
 

@@ -96,10 +96,10 @@ const PlaylistGenerator = () => {
     setTrackUri(trackUri); // Set the URI of the selected track
   };
 
-  // Generate a playlist based on user tracks (for example, top tracks)
+  // Generate a playlist based on user tracks 
   const generatePlaylist = () => {
     if (userTracks.length > 0) {
-      // Randomly select a few tracks (e.g., 10) from the user's top tracks
+      // Randomly select a few tracks from the user's top tracks
       const randomTracks = userTracks
         .sort(() => 0.5 - Math.random()) // Shuffle the array
         .slice(0, 10); // Select the first 10 tracks after shuffling
@@ -157,7 +157,7 @@ const PlaylistGenerator = () => {
         </div>
       </div>
 
-      {/* Spotify Player - Move it here to appear below playlists */}
+    
       {trackUri && <SpotifyPlayer token={token} trackUri={trackUri} />}
 
       {/* Selected Playlist Tracks */}
